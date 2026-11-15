@@ -1,0 +1,6 @@
+target/
+data/
+firebase-export-*/
+*.log
+.idea/
+.vscode/
