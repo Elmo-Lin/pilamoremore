@@ -1,0 +1,73 @@
+<!--
+  Source of public/og-image.png (link preview, 1200×630). After editing, re-render from frontend/:
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
+    --user-data-dir="$(mktemp -d)" --force-device-scale-factor=1 --window-size=1200,630 --screenshot=public/og-image.png "file://$PWD/scripts/og-image.html"
+-->
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: #f6f0ed;
+    font-family: -apple-system, 'SF Pro Display', 'PingFang TC', 'Noto Sans TC', sans-serif;
+    color: #1f1d1a;
+    -webkit-font-smoothing: antialiased;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 48px;
+    padding: 72px 80px;
+    align-items: center;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .logo { width: 52px; height: 52px; border-radius: 12px; background: #a54f74; display: grid; place-items: center; }
+  .brand span { font-size: 30px; font-weight: 600; letter-spacing: -0.01em; }
+  h1 { margin-top: 52px; font-size: 60px; white-space: nowrap; line-height: 1.18; font-weight: 700; letter-spacing: -0.02em; }
+  h1 em { font-style: normal; color: #8c4061; }
+  p.sub { margin-top: 28px; font-size: 24px; white-space: nowrap; line-height: 1.5; color: #59544d; }
+  .card {
+    background: #fff; border-radius: 28px; padding: 32px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 0 0 1px rgba(0,0,0,.05), 0 24px 48px -24px rgba(0,0,0,.18);
+  }
+  .label { font-size: 18px; color: #86868b; display: flex; justify-content: space-between; }
+  .big { margin-top: 6px; font-size: 52px; font-weight: 700; letter-spacing: -0.02em; }
+  .big small { font-size: 22px; font-weight: 500; color: #86868b; margin-left: 6px; }
+  .delta { color: #1f9d55; font-size: 18px; font-weight: 600; }
+  .bars { margin-top: 24px; height: 140px; display: flex; align-items: flex-end; gap: 12px; }
+  .bars div { flex: 1; border-radius: 8px 8px 3px 3px; background: #fee0eb; }
+  .bars div.on { background: #a54f74; }
+  .pr { margin-top: 24px; display: flex; align-items: center; gap: 14px; background: #f6f0ed; border-radius: 16px; padding: 16px 18px; }
+  .pr .t { flex: 1; white-space: nowrap; font-size: 20px; font-weight: 600; }
+  .pr .t span { display: block; font-size: 16px; font-weight: 400; color: #86868b; margin-top: 2px; }
+  .pr b { white-space: nowrap; font-size: 22px; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+  <section>
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 32 32" width="34" height="34"><rect x="12.8" y="13" width="11.2" height="4" rx="2" fill="#fff"/><path d="M4.8 19.8h22.4M7.2 19.8v2.6M24.8 19.8v2.6M8.6 19.8v-7.6a2.4 2.4 0 0 1 2.4-2.4h1.2" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+      <span>Pila More More</span>
+    </div>
+    <h1>更輕鬆的經營<br /><em>更專注的教學</em></h1>
+    <p class="sub">學員、課表、堂數與上課紀錄，一個地方搞定。<br />彈簧與次數點幾下就記好，進步看得見。</p>
+  </section>
+
+  <div class="card">
+    <div class="label">V 字平衡・最多次數 <span class="delta">▲ 4 下</span></div>
+    <div class="big">8<small>下</small></div>
+    <div class="bars">
+      <div style="height:38%"></div><div style="height:46%"></div><div style="height:44%"></div><div style="height:55%"></div>
+      <div style="height:62%"></div><div style="height:60%"></div><div style="height:74%"></div><div class="on" style="height:92%"></div>
+    </div>
+    <div class="pr">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a54f74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      <div class="t">長伸展新紀錄<span>本週</span></div>
+      <b>1紅1藍 × 8</b>
+    </div>
+  </div>
+</body>
+</html>

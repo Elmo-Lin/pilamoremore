@@ -1,0 +1,305 @@
+// Domain model for Pila More More.
+// Rules encoded here:
+// - Coach and Student are distinct user roles; everyone belongs to one studio.
+// - Workout sessions always belong to exactly one student.
+// - Workout logs record who created them.
+// - Session balances are NEVER stored; they are derived from a package's
+//   totalSessions plus the sum of its transaction deltas.
+
+export type ID = string
+/** ISO 8601 timestamp, e.g. 2026-10-20T09:30:00.000Z */
+export type ISODate = string
+
+/** 'owner' runs a studio and also teaches, so everywhere a coach can go an owner can too. */
+export type Role = 'coach' | 'owner' | 'student'
+
+export interface User {
+  id: ID
+  role: Role
+  name: string
+  email: string
+  phone?: string
+  createdAt: ISODate
+}
+
+export interface Coach extends User {
+  role: 'coach'
+  title: string
+  studio: string
+  /** Own profile only: quick-select options when adding a package. Undefined until customized (defaults apply). */
+  packagePresets?: PackagePreset[]
+}
+
+/** A coach's quick-select option for new session packages. */
+export interface PackagePreset {
+  name: string
+  totalSessions: number
+  priceTwd: number
+}
+
+export type StudentStatus = 'active' | 'inactive'
+
+/** Why someone takes Pilates (see GOAL_LABEL). */
+export type TrainingGoal =
+  | 'core'
+  | 'posture'
+  | 'pain'
+  | 'flexibility'
+  | 'postnatal'
+  | 'general'
+
+export type Gender = 'female' | 'male' | 'other'
+
+export interface Student extends User {
+  role: 'student'
+  gender: Gender
+  birthYear?: number
+  heightCm?: number
+  goal: TrainingGoal
+  goalDetail: string
+  status: StudentStatus
+  /** Planned sessions per week (coached + independent). */
+  weeklyFrequency: number
+  /** Private coach notes, never shown to the student. */
+  coachNotes: string
+  joinedAt: ISODate
+  /** API mode, coach view: whether the student has activated a login. */
+  activated?: boolean
+  /** API mode, coach view: left to train on their own (became a self-tracker); this record stays. */
+  leftAt?: ISODate
+}
+
+export interface CoachStudentRelationship {
+  id: ID
+  coachId: ID
+  studentId: ID
+  status: StudentStatus
+  startedAt: ISODate
+}
+
+/** Body area a move works. 'cardio' (the jump board): logged as time, not springs and reps. */
+export type MuscleGroup = 'legs' | 'back' | 'chest' | 'shoulders' | 'arms' | 'glutes' | 'core' | 'cardio'
+/** The Pilates apparatus a move is done on (or the mat, or small props). */
+export type Equipment = 'reformer' | 'mat' | 'cadillac' | 'chair' | 'barrel' | 'props' | 'other'
+
+export interface Exercise {
+  id: ID
+  name: string
+  nameEn: string
+  muscleGroup: MuscleGroup
+  equipment: Equipment
+  /** Added by this workspace (coaches share theirs with the studio and students). */
+  custom?: boolean
+  /** A custom exercise taken off the picker; workouts that used it still show it. */
+  archived?: boolean
+}
+
+export interface SetLog {
+  id: ID
+  /** Spring setting on the apparatus, e.g. "1紅1藍" (see lib/springs.ts); null on the mat or with props. */
+  springs?: string | null
+  /** Unused in Pilates (kept so records stay compatible with Lift More More's); always null. */
+  weightKg: number | null
+  reps: number | null
+  rpe: number | null
+  completed: boolean
+  /**
+   * Cardio is one entry per activity, as phones and watches record it: how long (seconds), and
+   * optionally how far (km), the average heart rate (bpm) and active energy (kcal).
+   */
+  durationSec?: number | null
+  distanceKm?: number | null
+  avgHeartRate?: number | null
+  calories?: number | null
+}
+
+export interface ExerciseLog {
+  id: ID
+  exerciseId: ID
+  sets: SetLog[]
+  notes?: string
+  /** Consecutive exercises with the same id form a superset (lib/superset.ts). */
+  supersetId?: ID
+}
+
+/** coached: led by the coach (may be billed). independent: student's own workout (never billed). */
+export type WorkoutType = 'coached' | 'independent'
+export type WorkoutStatus = 'draft' | 'completed'
+
+export interface WorkoutSession {
+  id: ID
+  studentId: ID
+  coachId?: ID
+  type: WorkoutType
+  createdBy: Role
+  status: WorkoutStatus
+  title: string
+  /** Coached sessions: the scheduled class this was logged for (finishing it completes the class). */
+  appointmentId?: ID
+  startedAt: ISODate
+  completedAt?: ISODate
+  updatedAt: ISODate
+  exercises: ExerciseLog[]
+  notes: string
+}
+
+export interface SessionPackage {
+  id: ID
+  studentId: ID
+  coachId: ID
+  name: string
+  totalSessions: number
+  priceTwd: number
+  purchaseDate: ISODate
+  expiresAt?: ISODate
+  notes?: string
+}
+
+/**
+ * Every change to a package balance is a transaction.
+ * deduction: delta = -1 linked to a coached workout.
+ * reversal: delta = +1 undoing a deduction (keeps history intact).
+ * adjustment: manual +/- n with a required reason.
+ */
+export type TransactionType = 'deduction' | 'reversal' | 'adjustment'
+
+export interface SessionTransaction {
+  id: ID
+  packageId: ID
+  studentId: ID
+  type: TransactionType
+  delta: number
+  reason: string
+  workoutSessionId?: ID
+  createdAt: ISODate
+  createdBy: Role
+}
+
+export type MetricType = 'bodyweight'
+
+export interface ProgressMetric {
+  id: ID
+  studentId: ID
+  type: MetricType
+  value: number
+  unit: 'kg'
+  recordedAt: ISODate
+}
+
+/** A move someone is working towards, set by themself, e.g. Teaser 10 reps. Reached once a completed set hits the reps. */
+export interface Goal {
+  id: ID
+  studentId: ID
+  exerciseId: ID
+  targetReps: number
+  /** Optional: when they want to get there. */
+  deadline?: ISODate
+  createdAt: ISODate
+}
+
+export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled'
+
+/** Mock calendar entry for upcoming coaching sessions. */
+export interface Appointment {
+  id: ID
+  coachId: ID
+  studentId: ID
+  startAt: ISODate
+  durationMin: number
+  location: string
+  status: AppointmentStatus
+}
+
+export type CoachMemberStatus = 'active' | 'invited' | 'inactive'
+
+/** A coach in a workspace (studio owner included). */
+export interface CoachMember {
+  id: ID
+  role: 'owner' | 'coach'
+  name: string
+  email: string
+  title?: string
+  status: CoachMemberStatus
+  /** Owner only, while the coach has not activated their account. */
+  inviteCode?: string
+  /** Offline demo only: a studio coach's own quick-select options (see Coach.packagePresets). */
+  packagePresets?: PackagePreset[]
+  createdAt: ISODate
+}
+
+/** The workspace: always a studio (an owner plus the teachers they invite). */
+export interface Studio {
+  id: ID
+  kind: 'studio'
+  name?: string
+  ownerId: ID
+  /** Seats for coaches, the owner included (from the plan in API mode). */
+  maxCoaches?: number
+  coaches: CoachMember[]
+}
+
+export type PlanId = 'team'
+/** expired: the trial or paid period lapsed; the workspace is read-only until someone subscribes. */
+/** complimentary: 永久版, free for good (granted on the admin page). */
+export type BillingStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'expired' | 'complimentary'
+
+/** API mode, coaches of a coaching workspace: the plan, its limits, and whether writes are allowed. */
+export interface Billing {
+  plan: PlanId
+  status: BillingStatus
+  writable: boolean
+  /** Free coaches and studio owners pay; studio coaches only see the status. */
+  canManage: boolean
+  trialEndsAt: ISODate
+  currentPeriodEnd?: ISODate
+  extraStudentPacks: number
+  extraCoachSeats: number
+  /** Downgrades that take effect at the next renewal. */
+  nextExtraStudentPacks?: number
+  nextExtraCoachSeats?: number
+  monthlyAmount: number
+  studentLimit: number
+  coachLimit: number
+  /** The whole workspace's active students. */
+  activeStudents: number
+  /** Active students the caller cannot see (a studio coach sees only their own). */
+  hiddenActiveStudents: number
+  /** A NewebPay monthly mandate is running. */
+  subscribed: boolean
+  paymentsEnabled: boolean
+}
+
+export interface AppData {
+  schemaVersion: number
+  seededAt: ISODate
+  coach: Coach
+  students: Student[]
+  relationships: CoachStudentRelationship[]
+  exercises: Exercise[]
+  workouts: WorkoutSession[]
+  packages: SessionPackage[]
+  transactions: SessionTransaction[]
+  metrics: ProgressMetric[]
+  appointments: Appointment[]
+  goals: Goal[]
+  /** Coaches only. Who teaches a student is relationships[].coachId. */
+  studio?: Studio | null
+  /** API mode, coaches only (absent in the offline demo and for self-trackers: no limits). */
+  billing?: Billing | null
+}
+
+export interface DemoSession {
+  role: Role
+  /** For the student role: which student the demo is viewing as. */
+  studentId: ID
+  /** API mode only: bearer token issued by the backend. */
+  token?: string
+  /** API mode only: signed-in user's display name. */
+  name?: string
+  /** API mode only: a new account that has yet to open the verification link mailed to this address. */
+  unverifiedEmail?: string
+  /** Offline demo only: acting as this studio coach, who sees only their own students. */
+  coachId?: ID
+  /** Offline demo only: which demo workspace (studio / solo / self) this identity lives in. */
+  space?: 'studio'
+}

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Installable app (add to home screen). iOS reads the apple-* tags, not the manifest icons. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Pila More" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Page background: the top bar is transparent at the top, so the status bar blends into it. -->
+    <meta name="theme-color" content="#f6f0ed" />
+    <script>
+      // Light or dark before the first paint, so a dark page never flashes white (kept in sync with src/lib/theme.ts).
+      (function () {
+        var pref
+        try { pref = localStorage.getItem('pilamoremore:theme') } catch (e) {}
+        var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#0d0a0b' : '#f6f0ed')
+      })()
+    </script>
+    <!-- Google sign-in loads its script and button from here; connecting early shortens the wait on the login page. -->
+    <link rel="preconnect" href="https://accounts.google.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+    />
+    <meta name="description" content="給皮拉提斯工作室、個人老師與自主練習者的管理工具：學員、課表、堂數與上課紀錄一個地方搞定，每一次的進步都看得見。" />
+    <title>Pila More More</title>
+    <!-- Link previews (LINE, Facebook, Slack, iMessage…). Image source: scripts/og-image.html -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pila More More" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:url" content="https://pilamoremore.com/" />
+    <meta property="og:title" content="Pila More More｜更輕鬆的經營，更專注的教學" />
+    <meta property="og:description" content="給皮拉提斯工作室、個人老師與自主練習者的管理工具：學員、課表、堂數與上課紀錄一個地方搞定，每一次的進步都看得見。" />
+    <meta property="og:image" content="https://pilamoremore.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Pila More More：更輕鬆的經營，更專注的教學" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Pila More More｜更輕鬆的經營，更專注的教學" />
+    <meta name="twitter:description" content="給皮拉提斯工作室、個人老師與自主練習者的管理工具：學員、課表、堂數與上課紀錄一個地方搞定，每一次的進步都看得見。" />
+    <meta name="twitter:image" content="https://pilamoremore.com/og-image.png" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
